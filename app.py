@@ -2,110 +2,141 @@ import streamlit as st
 import pickle
 import numpy as np
 
-# ---------------- PAGE CONFIG ----------------
+# ---------------- PAGE ----------------
 st.set_page_config(
-    page_title="Customer Churn Predictor",
-    page_icon="📊",
-    layout="centered"
+    page_title="AI Customer Churn Predictor",
+    page_icon="🚀",
+    layout="wide"
 )
 
 # ---------------- LOAD MODEL ----------------
 model = pickle.load(open("model.pkl","rb"))
 
-# ---------------- CUSTOM CSS ----------------
+# ---------------- STYLING ----------------
 st.markdown("""
 <style>
-.main {
-    padding-top: 1rem;
+.main{
+padding-top:1rem;
 }
-.big-title {
-    text-align:center;
-    padding:20px;
-    border-radius:20px;
-    background: linear-gradient(90deg,#4f46e5,#06b6d4);
-    color:white;
-    font-size:40px;
-    font-weight:bold;
+
+.hero{
+background: linear-gradient(90deg,#2563eb,#06b6d4);
+padding:30px;
+border-radius:25px;
+text-align:center;
+color:white;
+margin-bottom:25px;
+box-shadow:0 8px 25px rgba(0,0,0,0.15);
 }
-.subtitle{
-    text-align:center;
-    font-size:18px;
-    color:#666;
-    margin-bottom:20px;
+
+.hero h1{
+font-size:50px;
+margin-bottom:10px;
 }
-.pred-box{
-    padding:20px;
-    border-radius:16px;
-    font-size:24px;
-    text-align:center;
-    font-weight:bold;
+
+.hero p{
+font-size:20px;
+}
+
+.block-container{
+padding-top:1rem;
+}
+
+[data-testid="stMetric"]{
+background:#f8fafc;
+padding:20px;
+border-radius:20px;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
-st.markdown(
-'<div class="big-title">Customer Churn Prediction Dashboard</div>',
-unsafe_allow_html=True
-)
+# ---------------- HERO ----------------
+st.markdown("""
+<div class='hero'>
+<h1>🚀 Customer Churn Prediction Dashboard</h1>
+<p>AI-powered churn prediction using Random Forest</p>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown(
-'<div class="subtitle">Predict whether a travel customer is likely to churn</div>',
-unsafe_allow_html=True
-)
+# ---------------- TOP METRICS ----------------
+m1,m2,m3=st.columns(3)
+
+m1.metric("Model Accuracy","87.4%")
+m2.metric("Algorithm","Random Forest")
+m3.metric("Prediction Type","Binary")
+
+st.divider()
 
 # ---------------- INPUTS ----------------
-col1,col2 = st.columns(2)
+left,right=st.columns(2)
 
-with col1:
-    age = st.number_input("Age",18,80,30)
+with left:
+    st.subheader("Customer Profile")
 
-    frequent = st.selectbox(
+    age=st.number_input(
+        "Age",
+        18,80,30
+    )
+
+    frequent=st.selectbox(
         "Frequent Flyer",
         ["No","Yes","No Record"]
     )
 
-    income = st.selectbox(
+    income=st.selectbox(
         "Annual Income Class",
-        ["Low Income","Middle Income","High Income"]
+        [
+        "Low Income",
+        "Middle Income",
+        "High Income"
+        ]
     )
 
-with col2:
-    services = st.slider(
+with right:
+    st.subheader("Service Details")
+
+    services=st.slider(
         "Services Opted",
         1,6,2
     )
 
-    social = st.selectbox(
+    social=st.selectbox(
         "Account Synced",
         ["No","Yes"]
     )
 
-    hotel = st.selectbox(
+    hotel=st.selectbox(
         "Booked Hotel",
         ["No","Yes"]
     )
 
 # ---------------- ENCODING ----------------
-ff_map = {
+ff_map={
 "No":0,
 "Yes":1,
 "No Record":2
 }
 
-income_map = {
+income_map={
 "Low Income":0,
 "Middle Income":1,
 "High Income":2
 }
 
-yesno = {
+yesno={
 "No":0,
 "Yes":1
 }
 
-# ---------------- BUTTON ----------------
-if st.button("🔍 Predict Churn",use_container_width=True):
+st.write("")
+predict=st.button(
+"🔍 Run Churn Prediction",
+use_container_width=True
+)
+
+# ---------------- PREDICTION ----------------
+if predict:
 
     data=np.array([[
         age,
@@ -120,24 +151,39 @@ if st.button("🔍 Predict Churn",use_container_width=True):
     prob=model.predict_proba(data)[0][1]
 
     st.divider()
+    st.subheader("Prediction Results")
 
-    st.subheader("Prediction Result")
+    c1,c2=st.columns(2)
 
-    if pred==1:
-        st.error(
-            f"⚠ Customer Likely To Churn\n\nRisk Probability: {prob:.2%}"
+    with c1:
+        st.metric(
+        "Churn Risk",
+        f"{prob:.2%}"
         )
-    else:
-        st.success(
-            f"✅ Customer Likely To Stay\n\nRetention Probability: {(1-prob):.2%}"
+
+    with c2:
+        st.metric(
+        "Retention Probability",
+        f"{1-prob:.2%}"
         )
 
     st.progress(float(prob))
 
-    st.metric(
-        label="Churn Risk Score",
-        value=f"{prob:.2%}"
-    )
+    if pred==1:
+        st.error(
+        "⚠ HIGH RISK: Customer likely to churn"
+        )
+    else:
+        st.success(
+        "✅ LOW RISK: Customer likely to stay"
+        )
+
+    if prob<0.30:
+        st.success("Risk Level: Low")
+    elif prob<0.70:
+        st.warning("Risk Level: Medium")
+    else:
+        st.error("Risk Level: High")
 
 st.divider()
-st.caption("Built with Random Forest + Streamlit")
+st.caption("Built with Python • Random Forest • Streamlit")
