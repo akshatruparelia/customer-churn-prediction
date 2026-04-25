@@ -2,114 +2,129 @@ import streamlit as st
 import pickle
 import numpy as np
 
-# ---------------- PAGE ----------------
+# ---------------- SETTINGS ----------------
 st.set_page_config(
-    page_title="AI Customer Churn Predictor",
-    page_icon="🚀",
-    layout="wide"
+page_title="AI Churn Analytics Dashboard",
+page_icon="📈",
+layout="wide"
 )
 
-# ---------------- LOAD MODEL ----------------
-model = pickle.load(open("model.pkl","rb"))
+model=pickle.load(open("model.pkl","rb"))
 
-# ---------------- STYLING ----------------
+# ---------------- CSS ----------------
 st.markdown("""
 <style>
 .main{
-padding-top:1rem;
+padding-top:0rem;
 }
 
 .hero{
-background: linear-gradient(90deg,#2563eb,#06b6d4);
-padding:30px;
-border-radius:25px;
+background:linear-gradient(90deg,#1d4ed8,#06b6d4);
+padding:35px;
+border-radius:30px;
 text-align:center;
 color:white;
+box-shadow:0px 8px 20px rgba(0,0,0,.15);
 margin-bottom:25px;
-box-shadow:0 8px 25px rgba(0,0,0,0.15);
 }
 
 .hero h1{
-font-size:50px;
-margin-bottom:10px;
+font-size:52px;
+margin-bottom:8px;
 }
 
 .hero p{
 font-size:20px;
 }
 
-.block-container{
-padding-top:1rem;
+.card{
+background:#f8fafc;
+padding:18px;
+border-radius:20px;
+box-shadow:0px 4px 12px rgba(0,0,0,.08);
 }
 
 [data-testid="stMetric"]{
-background:#f8fafc;
-padding:20px;
-border-radius:20px;
-box-shadow:0 4px 12px rgba(0,0,0,.08);
+background:#ffffff;
+padding:18px;
+border-radius:18px;
+box-shadow:0px 4px 12px rgba(0,0,0,.08);
 }
 </style>
-""", unsafe_allow_html=True)
+""",unsafe_allow_html=True)
 
-# ---------------- HERO ----------------
+# ---------------- HEADER ----------------
 st.markdown("""
 <div class='hero'>
-<h1>🚀 Customer Churn Prediction Dashboard</h1>
-<p>AI-powered churn prediction using Random Forest</p>
+<h1>🚀 AI Customer Churn Analytics</h1>
+<p>Predict churn risk using Random Forest Machine Learning</p>
 </div>
-""", unsafe_allow_html=True)
+""",unsafe_allow_html=True)
 
-# ---------------- TOP METRICS ----------------
-m1,m2,m3=st.columns(3)
+# ---------------- TOP CARDS ----------------
+a,b,c,d=st.columns(4)
 
-m1.metric("Model Accuracy","87.4%")
-m2.metric("Algorithm","Random Forest")
-m3.metric("Prediction Type","Binary")
+a.metric("Model Accuracy","87.4%")
+b.metric("Algorithm","Random Forest")
+c.metric("Features","6")
+d.metric("Task","Classification")
 
 st.divider()
 
-# ---------------- INPUTS ----------------
-left,right=st.columns(2)
+# ---------------- INPUT + ANALYTICS ----------------
+left,right=st.columns([2,1])
 
 with left:
-    st.subheader("Customer Profile")
 
-    age=st.number_input(
+    st.subheader("Customer Input")
+
+    col1,col2=st.columns(2)
+
+    with col1:
+        age=st.number_input(
         "Age",
         18,80,30
-    )
+        )
 
-    frequent=st.selectbox(
+        frequent=st.selectbox(
         "Frequent Flyer",
         ["No","Yes","No Record"]
-    )
+        )
 
-    income=st.selectbox(
+        income=st.selectbox(
         "Annual Income Class",
         [
         "Low Income",
         "Middle Income",
         "High Income"
         ]
-    )
+        )
 
-with right:
-    st.subheader("Service Details")
-
-    services=st.slider(
+    with col2:
+        services=st.slider(
         "Services Opted",
         1,6,2
-    )
+        )
 
-    social=st.selectbox(
+        social=st.selectbox(
         "Account Synced",
         ["No","Yes"]
-    )
+        )
 
-    hotel=st.selectbox(
+        hotel=st.selectbox(
         "Booked Hotel",
         ["No","Yes"]
-    )
+        )
+
+with right:
+    st.subheader("Feature Snapshot")
+    st.info(f"""
+Age: {age}
+
+Services: {services}
+
+Income: {income}
+""")
 
 # ---------------- ENCODING ----------------
 ff_map={
@@ -130,8 +145,9 @@ yesno={
 }
 
 st.write("")
+
 predict=st.button(
-"🔍 Run Churn Prediction",
+"🔍 Run Prediction",
 use_container_width=True
 )
 
@@ -139,51 +155,66 @@ use_container_width=True
 if predict:
 
     data=np.array([[
-        age,
-        ff_map[frequent],
-        income_map[income],
-        services,
-        yesno[social],
-        yesno[hotel]
+    age,
+    ff_map[frequent],
+    income_map[income],
+    services,
+    yesno[social],
+    yesno[hotel]
     ]])
 
     pred=model.predict(data)[0]
     prob=model.predict_proba(data)[0][1]
 
     st.divider()
-    st.subheader("Prediction Results")
+    st.subheader("Prediction Dashboard")
 
-    c1,c2=st.columns(2)
+    p1,p2,p3=st.columns(3)
 
-    with c1:
-        st.metric(
-        "Churn Risk",
-        f"{prob:.2%}"
-        )
+    p1.metric(
+    "Churn Risk",
+    f"{prob:.2%}"
+    )
 
-    with c2:
-        st.metric(
-        "Retention Probability",
-        f"{1-prob:.2%}"
-        )
+    p2.metric(
+    "Retention",
+    f"{1-prob:.2%}"
+    )
+
+    if prob<0.30:
+        risk="Low"
+    elif prob<0.70:
+        risk="Medium"
+    else:
+        risk="High"
+
+    p3.metric(
+    "Risk Level",
+    risk
+    )
 
     st.progress(float(prob))
 
     if pred==1:
         st.error(
-        "⚠ HIGH RISK: Customer likely to churn"
+        "⚠ Customer likely to churn"
         )
     else:
         st.success(
-        "✅ LOW RISK: Customer likely to stay"
+        "✅ Customer likely to stay"
         )
 
-    if prob<0.30:
-        st.success("Risk Level: Low")
-    elif prob<0.70:
-        st.warning("Risk Level: Medium")
-    else:
-        st.error("Risk Level: High")
+    st.subheader("Feature Influence (Demo)")
+    st.bar_chart({
+    "Importance":[
+    0.35,
+    0.25,
+    0.15,
+    0.12,
+    0.08,
+    0.05
+    ]},
+    )
 
 st.divider()
-st.caption("Built with Python • Random Forest • Streamlit")
+st.caption("Built using Python • Random Forest • Streamlit")
