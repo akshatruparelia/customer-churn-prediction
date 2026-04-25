@@ -246,18 +246,30 @@ if predict:
         "✅ Customer likely to stay"
         )
 
-    st.subheader("Feature Influence (Demo)")
+    st.subheader("Feature Influence Graph")
 
-    st.bar_chart({
-    "Importance":[
-    0.35,
-    0.25,
-    0.15,
-    0.12,
-    0.08,
-    0.05
-    ]},
-    )
+    import pandas as pd
+
+features=[
+"Age",
+"FrequentFlyer",
+"IncomeClass",
+"ServicesOpted",
+"AccountSynced",
+"BookedHotel"
+]
+
+importance=model.feature_importances_
+
+chart_data=pd.DataFrame(
+{
+"Feature":features,
+"Importance":importance
+}
+).set_index("Feature")
+
+st.subheader("Actual Feature Importance")
+st.bar_chart(chart_data)
 
 st.divider()
 st.caption("Built using Python • Random Forest • Streamlit")
