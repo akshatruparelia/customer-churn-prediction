@@ -16,8 +16,10 @@ st.markdown("""
 <style>
 .main{
 padding-top:0rem;
+background:#0f172a;
 }
 
+/* Hero Banner */
 .hero{
 background:linear-gradient(90deg,#1d4ed8,#06b6d4);
 padding:35px;
@@ -37,18 +39,57 @@ margin-bottom:8px;
 font-size:20px;
 }
 
-.card{
-background:#f8fafc;
-padding:18px;
-border-radius:20px;
-box-shadow:0px 4px 12px rgba(0,0,0,.08);
-}
-
+/* Metric Cards */
 [data-testid="stMetric"]{
 background:#ffffff;
-padding:18px;
+padding:20px;
+border-radius:20px;
+box-shadow:0px 4px 15px rgba(0,0,0,.12);
+}
+
+/* Metric labels */
+[data-testid="stMetricLabel"]{
+color:#111827 !important;
+font-size:18px !important;
+font-weight:700 !important;
+}
+
+/* Metric values */
+[data-testid="stMetricValue"]{
+color:#111827 !important;
+font-size:34px !important;
+font-weight:800 !important;
+}
+
+/* Input containers */
+[data-testid="stSelectbox"],
+[data-testid="stNumberInput"],
+[data-testid="stSlider"]{
+border-radius:15px;
+}
+
+/* Button */
+.stButton>button{
+background:linear-gradient(90deg,#2563eb,#06b6d4);
+color:white;
+border:none;
+padding:14px;
+font-size:18px;
+font-weight:bold;
+border-radius:14px;
+}
+
+.stButton>button:hover{
+transform:scale(1.02);
+}
+
+/* Snapshot box */
+.info-box{
+background:#1e3a5f;
+padding:20px;
 border-radius:18px;
-box-shadow:0px 4px 12px rgba(0,0,0,.08);
+color:white;
+font-size:18px;
 }
 </style>
 """,unsafe_allow_html=True)
@@ -71,7 +112,7 @@ d.metric("Task","Classification")
 
 st.divider()
 
-# ---------------- INPUT + ANALYTICS ----------------
+# ---------------- INPUT AREA ----------------
 left,right=st.columns([2,1])
 
 with left:
@@ -118,13 +159,14 @@ with left:
 
 with right:
     st.subheader("Feature Snapshot")
-    st.info(f"""
-Age: {age}
 
-Services: {services}
-
-Income: {income}
-""")
+    st.markdown(f"""
+<div class='info-box'>
+<p>Age: {age}</p>
+<p>Services: {services}</p>
+<p>Income: {income}</p>
+</div>
+""",unsafe_allow_html=True)
 
 # ---------------- ENCODING ----------------
 ff_map={
@@ -205,6 +247,7 @@ if predict:
         )
 
     st.subheader("Feature Influence (Demo)")
+
     st.bar_chart({
     "Importance":[
     0.35,
