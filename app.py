@@ -3,7 +3,6 @@ import pickle
 import numpy as np
 import pandas as pd
 
-# ---------------- SETTINGS ----------------
 st.set_page_config(
 page_title="AI Churn Analytics Dashboard",
 page_icon="📈",
@@ -12,7 +11,6 @@ layout="wide"
 
 model=pickle.load(open("model.pkl","rb"))
 
-# ---------------- CSS ----------------
 st.markdown("""
 <style>
 .main{
@@ -95,7 +93,6 @@ font-size:18px;
 </style>
 """,unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
 st.markdown("""
 <div class='hero'>
 <h1>🚀 AI Customer Churn Analytics</h1>
@@ -103,7 +100,6 @@ st.markdown("""
 </div>
 """,unsafe_allow_html=True)
 
-# ---------------- TOP CARDS ----------------
 a,b,c,d=st.columns(4)
 
 a.metric("Model Accuracy","87.4%")
@@ -113,7 +109,6 @@ d.metric("Task","Classification")
 
 st.divider()
 
-# ---------------- INPUT AREA ----------------
 left,right=st.columns([2,1])
 
 with left:
@@ -169,7 +164,6 @@ with right:
 </div>
 """,unsafe_allow_html=True)
 
-# ---------------- ENCODING ----------------
 ff_map={
 "No":0,
 "Yes":1,
@@ -194,7 +188,6 @@ predict=st.button(
 use_container_width=True
 )
 
-# ---------------- PREDICTION ----------------
 if predict:
 
     data=np.array([[
